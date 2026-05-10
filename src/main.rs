@@ -66,12 +66,36 @@ fn tokenize(content: &str) -> Vec<HttpToken> {
     tokens
 }
 
+fn parse_requests(tokens: Vec<HttpToken>) -> Vec<HttpRequest> {
+    let mut current_method: Option<HttpMethod> = None;
+    let mut current_url: Option<String> = None;
+
+    for token in tokens {
+        match token {
+            HttpToken::RequestLine(method_str, url_str) => {
+                current_method = match method_str.as_str() {
+                    "POST" => Some(HttpMethod::Post),
+                    "GET" => Some(HttpMethod::Get),
+                    "PUT" => Some(HttpMethod::Put),
+                    "DELETE" => Some(HttpMethod::Delete),
+                    _ => None,
+                };
+                current_url = Some(url_str);
+            }
+            _ => {}
+        }
+    }
+    println!("Found Method: {:#?}", current_method);
+    println!("Found URL: {:#?}", current_url);
+    Vec::new()
+}
+
 fn main() {
     let mut my_headers = HashMap::new();
     my_headers.insert("Content-Type".to_string(), "application/json".to_string());
     let my_http_request = HttpRequest {
         method: HttpMethod::Post,
-        url: "https://webhook.site/c07ba92e-27c2-455a-b2c5-dc762d9eb1a8".to_string(),
+        url: "www.url.com".to_string(),
         headers: my_headers,
         body: Some("Hello World".to_string()),
     };
@@ -92,4 +116,6 @@ fn main() {
 
     let my_tokens = tokenize(raw_text.trim());
     println!("{:#?}", my_tokens);
+
+    parse_requests(my_tokens);
 }
