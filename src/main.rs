@@ -91,6 +91,26 @@ fn parse_requests(tokens: Vec<HttpToken>) -> Vec<HttpRequest> {
             HttpToken::Body(line) => {
                 current_body_lines.push(line);
             }
+            HttpToken::Separator => {
+                let final_body = current_body_lines.join("\n");
+                let body_option = if final_body.is_empty() {
+                    None
+                } else {
+                    Some(final_body)
+                };
+                let ready_headers = current_headers;
+                current_headers = HashMap::new();
+                if let (Some(method), Some(url)) = (current_method.take(), current_url.take()) {
+                    let req = HttpRequest {
+                        method,
+                        url,
+                        headers: ready_headers,
+                        body: body_option,
+                    };
+                    request.push(req);
+                }
+                current_body_lines.clear();
+            }
             _ => {}
         }
     }
@@ -127,6 +147,8 @@ fn main() {
 
     let raw_text = "
     @base_url=http://127.0.0.1:8000
+    ###
+    GET {{base_url}}/ping
     ###
     POST {{base_url}}/todoitems
     Content-Type: application/json
