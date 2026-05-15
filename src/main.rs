@@ -69,6 +69,9 @@ fn tokenize(content: &str) -> Vec<HttpToken> {
 fn parse_requests(tokens: Vec<HttpToken>) -> Vec<HttpRequest> {
     let mut current_method: Option<HttpMethod> = None;
     let mut current_url: Option<String> = None;
+    let mut current_headers: HashMap<String, String> = HashMap::new();
+    let mut current_body_lines: Vec<String> = Vec::new();
+    let mut request = Vec::new();
 
     for token in tokens {
         match token {
@@ -82,12 +85,33 @@ fn parse_requests(tokens: Vec<HttpToken>) -> Vec<HttpRequest> {
                 };
                 current_url = Some(url_str);
             }
+            HttpToken::Header(key, value) => {
+                current_headers.insert(key, value);
+            }
+            HttpToken::Body(line) => {
+                current_body_lines.push(line);
+            }
             _ => {}
         }
     }
-    println!("Found Method: {:#?}", current_method);
-    println!("Found URL: {:#?}", current_url);
-    Vec::new()
+    let final_body = current_body_lines.join("\n");
+    let body_option = if final_body.is_empty() {
+        None
+    } else {
+        Some(final_body)
+    };
+
+    if let (Some(method), Some(url)) = (current_method, current_url) {
+        let req = HttpRequest {
+            method,
+            url,
+            headers: current_headers,
+            body: body_option,
+        };
+        request.push(req);
+    }
+
+    request
 }
 
 fn main() {
@@ -117,5 +141,6 @@ fn main() {
     let my_tokens = tokenize(raw_text.trim());
     println!("{:#?}", my_tokens);
 
-    parse_requests(my_tokens);
+    let parsed_request = parse_requests(my_tokens);
+    println!("Parsed request:\n{:?}", parsed_request);
 }
