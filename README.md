@@ -1,10 +1,11 @@
-# crab_call
+# Crab Call
 
 A Rust HTTP client that parses and executes `.http` files.
 
 ## Overview
 
-crab_call reads a `.http` file format tokenizes it, resolves variables, and executes the defined HTTP requests.
+Crab Call reads a `.http` file format tokenizes it, resolves variables,
+and executes the defined HTTP requests.
 
 ## Features
 
@@ -49,7 +50,8 @@ Content-Type: application/json
 {"name": "Alice", "email": "alice@example.com"}
 ```
 
-Each request is separated by `###`. Variables defined with `@` are available for interpolation in all subsequent requests.
+Each request is separated by `###`.
+Variables defined with `@` are available for interpolation in all subsequent requests.
 
 ## Project Structure
 
