@@ -154,12 +154,19 @@ fn parse_requests(tokens: Vec<HttpToken>) -> Vec<HttpRequest> {
 fn send_request(req: &HttpRequest) {
     let client = reqwest::blocking::Client::new();
 
-    let builder = match req.method {
+    let mut builder = match req.method {
         HttpMethod::Get => client.get(&req.url),
         HttpMethod::Post => client.post(&req.url),
         HttpMethod::Put => client.put(&req.url),
         HttpMethod::Delete => client.delete(&req.url),
     };
+    for (key, value) in &req.headers {
+        builder = builder.header(key, value);
+    }
+
+    if let Some(body_content) = &req.body {
+        builder = builder.body(body_content.clone());
+    }
 
     let response = builder.send().expect("Failed to send HTTP request");
 
@@ -181,10 +188,17 @@ fn main() {
     println!("{:#?}", my_http_request);
 
     let raw_text = "
-   @base_url=https://httpbin.org
-   ###
-   GET {{base_url}}/get
-   ";
+    @base_url=https://httpbin.org
+    ###
+    POST {{base_url}}/post
+    Content-Type: application/json
+    Authorization: Bearer my-secret-rust-token
+
+    {
+        \"name\": \"CrabCall\",
+        \"isnice\": true
+    }
+    ";
 
     let my_tokens = tokenize(raw_text.trim());
     println!("{:#?}", my_tokens);
