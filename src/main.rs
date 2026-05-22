@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::env;
+use std::fs;
 
 #[derive(Debug)]
 enum HttpMethod {
@@ -176,29 +178,13 @@ fn send_request(req: &HttpRequest) {
     println!("----------------\n");
 }
 
-fn main() {
-    let mut my_headers = HashMap::new();
-    my_headers.insert("Content-Type".to_string(), "application/json".to_string());
-    let my_http_request = HttpRequest {
-        method: HttpMethod::Post,
-        url: "www.url.com".to_string(),
-        headers: my_headers,
-        body: Some("Hello World".to_string()),
-    };
-    println!("{:#?}", my_http_request);
-
-    let raw_text = "
-    @base_url=https://httpbin.org
-    ###
-    POST {{base_url}}/post
-    Content-Type: application/json
-    Authorization: Bearer my-secret-rust-token
-
-    {
-        \"name\": \"CrabCall\",
-        \"isnice\": true
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 2 {
+        println!("Usage: crabcall <file.http>");
+        return Ok(());
     }
-    ";
+    let raw_text = fs::read_to_string(&args[1])?;
 
     let my_tokens = tokenize(raw_text.trim());
     println!("{:#?}", my_tokens);
@@ -209,4 +195,6 @@ fn main() {
     for req in &parsed_request {
         send_request(req);
     }
+
+    Ok(())
 }

@@ -1,0 +1,15 @@
+# Define variables
+@base_url=https://httpbin.org
+@token=my-secret-token
+
+### GET request with variable interpolation
+GET {{base_url}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### POST request with a body
+POST {{base_url}}/post
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"name": "Alice", "email": "alice@example.com"}
