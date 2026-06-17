@@ -11,7 +11,7 @@ A Rust HTTP client that parses and executes `.http` files.
 
 ```sh
 cargo build
-cargo run
+cargo run -- test.http
 ```
 
 ## Usage
